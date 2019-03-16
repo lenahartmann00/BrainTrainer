@@ -1,7 +1,10 @@
 package com.example.braintrainer;
 
+import android.app.Activity;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.CountDownTimer;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -16,6 +19,8 @@ public class MainActivity extends AppCompatActivity {
     //change to customize the game
     int highestPossibleCalculationResult = 60; //has to be an even number!
     int timerLength = 15; //in seconds
+    int wrongAnswerMinusPoints = 15;
+    int correctAnswerPlusPoints = 20;
 
     //do not change!
     boolean gameFinished;
@@ -34,6 +39,10 @@ public class MainActivity extends AppCompatActivity {
     Button playAgainButton;
     ImageView clock;
     Button startButton;
+
+    SharedPreferences sharedPreferences;
+    int currentPoints;
+    int currentHighscore;
 
 
 
@@ -59,6 +68,10 @@ public class MainActivity extends AppCompatActivity {
         startButton.setVisibility(View.VISIBLE);
         playAgainButton.setVisibility(View.INVISIBLE);
         setVisibilityOfGameLayout(View.INVISIBLE);
+
+        //Load current highscore
+        sharedPreferences = getSharedPreferences("shared_preferences", Activity.MODE_PRIVATE);
+        currentHighscore = sharedPreferences.getInt("highscore", 0);
     }
 
     public void startGame(View view){
@@ -70,7 +83,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setDefault(){
+        calculation.setTextSize(50);
         gameFinished = false;
+        currentPoints = 0;
         correctAnswers = 0;
         numberAnswers = 0;
         playAgainButton.setVisibility(View.INVISIBLE);
@@ -87,10 +102,20 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                calculation.setText("DONE!");
-                calculation.setTextColor(Color.argb(255,216,27,0));
                 playAgainButton.setVisibility(View.VISIBLE);
 		        gameFinished = true;
+		        calculation.setTextSize(25);
+		        if(currentPoints > currentHighscore){
+		            currentHighscore = currentPoints;
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putInt("your_int_key", currentPoints);
+                    editor.commit();
+                    calculation.setText("NEW HIGHSCORE: " + currentPoints + " points");
+                    calculation.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.green));
+                } else{
+                    calculation.setText("You have "+currentPoints+" points. The highscore is: "+currentHighscore+ ". Try again!");
+                    calculation.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.red));
+                }
             }
         }.start();
     }
@@ -134,6 +159,9 @@ public class MainActivity extends AppCompatActivity {
         numberAnswers++;
         if(answerIsCorrect){
             correctAnswers++;
+            currentPoints += correctAnswerPlusPoints;
+        } else{
+            currentPoints -= wrongAnswerMinusPoints;
         }
         textAnswer.setText(correctAnswers+"/"+numberAnswers);
     }
