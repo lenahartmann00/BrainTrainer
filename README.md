@@ -1,4 +1,5 @@
 # Brain Trainer
+![Screenshot](braintrainer.png)
 Train your brain with this addition app. You've got 15 seconds to get as many answers right as you can. For every correct answer you will get 20 points, every wrong answer gets you -15 points. Try to beat the current high score!
 
 ## What I learned
